@@ -2,22 +2,33 @@ package com.estrelsteel.ld40;
 
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
+import java.awt.event.MouseMotionListener;
 
 
-public class InputHandler implements KeyListener {
+public class InputHandler implements KeyListener, MouseListener, MouseMotionListener {
 
 	public boolean up;
 	public boolean down;
 	public boolean left;
 	public boolean right;
-	public boolean attack;
+	public boolean attack1;
+	public boolean attack2;
+	
+	public int x;
+	public int y;
 	
 	public InputHandler() {
 		up = false;
 		down = false;
 		left = false;
 		right = false;
-		attack = false;
+		attack1 = false;
+		attack2 = false;
+		
+		x = 0;
+		y = 0;
 	}
 	
 	
@@ -40,9 +51,12 @@ public class InputHandler implements KeyListener {
 		if(e.getKeyCode() == 68 || e.getKeyCode() == 39) {
 			right = true;
 		}
-		if(e.getKeyCode() == 32 || e.getKeyCode() == 16) {
-			attack = true;
-		}
+//		if(e.getKeyCode() == 32 || e.getKeyCode() == 16) {
+//			attack1 = true;
+//		}
+//		if(e.getKeyCode() == 69 || e.getKeyCode() == 88) {
+//			attack2 = true;
+//		}
 	}
 
 	@Override
@@ -59,9 +73,70 @@ public class InputHandler implements KeyListener {
 		if(e.getKeyCode() == 68 || e.getKeyCode() == 39) {
 			right = false;
 		}
-		if(e.getKeyCode() == 32 || e.getKeyCode() == 16) {
-			attack = false;
+//		if(e.getKeyCode() == 32 || e.getKeyCode() == 90) {
+//			attack1 = false;
+//		}
+//		if(e.getKeyCode() == 69 || e.getKeyCode() == 88) {
+//			attack2 = false;
+//		}
+	}
+
+
+	@Override
+	public void mouseClicked(MouseEvent e) {
+		
+	}
+
+
+	@Override
+	public void mousePressed(MouseEvent e) {
+		x = e.getX();
+		y = e.getY();
+		if(e.getButton() == MouseEvent.BUTTON1) {
+			attack1 = true;
 		}
+		else if(e.getButton() == MouseEvent.BUTTON3) {
+			attack2 = true;
+		}
+	}
+
+
+	@Override
+	public void mouseReleased(MouseEvent e) {
+		x = e.getX();
+		y = e.getY();
+		if(e.getButton() == MouseEvent.BUTTON1) {
+			attack1 = false;
+		}
+		else if(e.getButton() == MouseEvent.BUTTON3) {
+			attack2 = false;
+		}
+	}
+
+
+	@Override
+	public void mouseEntered(MouseEvent e) {
+		
+	}
+
+
+	@Override
+	public void mouseExited(MouseEvent e) {
+		
+	}
+
+
+	@Override
+	public void mouseDragged(MouseEvent e) {
+		x = e.getX();
+		y = e.getY();
+	}
+
+
+	@Override
+	public void mouseMoved(MouseEvent e) {
+		x = e.getX();
+		y = e.getY();
 	}
 
 }

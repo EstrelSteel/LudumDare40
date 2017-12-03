@@ -17,25 +17,39 @@ public class Bullet extends Actor {
 	private int direction;
 	private double damage;
 	private Rectangle lastLocation;
+	private Gunman owner;
 	
-	public Bullet(String name, Rectangle location, int direction) {
+	public Bullet(String name, Rectangle location, int direction, int animationNum, Gunman owner) {
 		super(name, location);
-		getAnimations().add(new Animation("bullet", 0));
+		getAnimations().add(0, new Animation("bullet", 0));
 		getAnimations().get(0).getFrames().add(new ConfinedImage(Engine2.devPath + "/res/img/game.png", QuickRectangle.location(1 * 16, 0, 16, 16)));
+		getAnimations().add(1, new Animation("lazer_red", 1));
+		getAnimations().get(1).getFrames().add(new ConfinedImage(Engine2.devPath + "/res/img/game.png", QuickRectangle.location(4 * 16, 0, 16, 16)));
+		getAnimations().add(2, new Animation("lazer_blue", 2));
+		getAnimations().get(2).getFrames().add(new ConfinedImage(Engine2.devPath + "/res/img/game.png", QuickRectangle.location(5 * 16, 0, 16, 16)));
 		
-		speed = 25;
-		damage = 50;
+		speed = 7;
+		damage = 20;
+		
+		this.owner = owner;
+		
 		this.direction = direction;
 		this.getRotation().setCentre(PointMaths.getCentre(location));
 		this.lastLocation = location;
+		
+		setRunningAnimationNumber(animationNum);
+		
+		if(direction == 0) {
+			getRotation().setDegrees(0);
+		}
 		if(direction == 1) {
-			this.getRotation().setDegrees(180);
+			getRotation().setDegrees(180);
 		}
 		if(direction == 2) {
-			this.getRotation().setDegrees(270);
+			getRotation().setDegrees(270);
 		}
 		if(direction == 3) {
-			this.getRotation().setDegrees(90);
+			getRotation().setDegrees(90);
 		}
 	}
 
@@ -68,7 +82,7 @@ public class Bullet extends Actor {
 			AbstractedRectangle rect = new AbstractedRectangle(getLocation().getTop(), getLastLocation().getBottom());
 			return new RectangleCollideArea(QuickRectangle.location(rect.getX(), rect.getY(), rect.getWidth(), rect.getHeight()));
 		}
-		else if(direction == 1 || direction == 2) {
+		else if(direction == 1 || direction == 3) {
 			AbstractedRectangle rect = new AbstractedRectangle(getLastLocation().getTop(), getLocation().getBottom());
 			return new RectangleCollideArea(QuickRectangle.location(rect.getX(), rect.getY(), rect.getWidth(), rect.getHeight()));
 		}
@@ -76,18 +90,8 @@ public class Bullet extends Actor {
 	}
 	
 	public void travel() {
-		if(direction == 0) {
-			setLocation(QuickRectangle.location(getLocation().getX(), getLocation().getY() - speed, getLocation().getWidth(), getLocation().getHeight()));
-		}
-		else if(direction == 1) {
-			setLocation(QuickRectangle.location(getLocation().getX(), getLocation().getY() + speed, getLocation().getWidth(), getLocation().getHeight()));
-		}
-		else if(direction == 2) {
-			setLocation(QuickRectangle.location(getLocation().getX() - speed, getLocation().getY(), getLocation().getWidth(), getLocation().getHeight()));
-		}
-		else if(direction == 3) {
-			setLocation(QuickRectangle.location(getLocation().getX() + speed, getLocation().getY(), getLocation().getWidth(), getLocation().getHeight()));
-		}
+		setLocation(QuickRectangle.location(getLocation().getX() + speed * Math.cos(getRotation().getRadians() - Math.PI / 2), 
+				getLocation().getY() + speed * Math.sin(getRotation().getRadians() - Math.PI / 2), getLocation().getWidth(), getLocation().getHeight()));
 	}
 	
 	public Rectangle getLastLocation() {
@@ -110,5 +114,13 @@ public class Bullet extends Actor {
 	public void setLocation(Rectangle loc) {
 		this.lastLocation = getLocation();
 		super.setLocation(loc);
+	}
+
+	public Gunman getOwner() {
+		return owner;
+	}
+
+	public void setOwner(Gunman owner) {
+		this.owner = owner;
 	}
 }
