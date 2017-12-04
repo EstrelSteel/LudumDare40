@@ -1,6 +1,7 @@
 package com.estrelsteel.ld40;
 
 import java.awt.Color;
+import java.awt.Font;
 import java.awt.Graphics2D;
 import java.io.IOException;
 import java.text.DecimalFormat;
@@ -14,7 +15,7 @@ import com.estrelsteel.engine2.events.listener.StopListener;
 import com.estrelsteel.engine2.events.listener.TickListener;
 import com.estrelsteel.engine2.file.GameFile;
 import com.estrelsteel.engine2.grid.PixelGrid;
-import com.estrelsteel.engine2.image.ConfinedImage;
+import com.estrelsteel.engine2.image.Image;
 import com.estrelsteel.engine2.image.Renderable;
 import com.estrelsteel.engine2.point.AbstractedPoint;
 import com.estrelsteel.engine2.point.PointMaths;
@@ -28,8 +29,13 @@ import com.estrelsteel.engine2.tile.TileType;
 import com.estrelsteel.engine2.window.WindowSettings;
 import com.estrelsteel.engine2.world.Level;
 import com.estrelsteel.engine2.world.World;
+import com.estrelsteel.ld40.actors.ActorLoader;
 import com.estrelsteel.ld40.actors.Bullet;
+import com.estrelsteel.ld40.actors.Button;
+import com.estrelsteel.ld40.actors.Door;
+import com.estrelsteel.ld40.actors.Exit;
 import com.estrelsteel.ld40.actors.Gunman;
+import com.estrelsteel.ld40.actors.LaserField;
 import com.estrelsteel.ld40.actors.LightSource;
 import com.estrelsteel.ld40.actors.Player;
 import com.estrelsteel.ld40.actors.guard.AISwitch;
@@ -39,7 +45,7 @@ import com.estrelsteel.ld40.actors.guard.GuardState;
 public class LD40 implements StartListener, StopListener, TickListener, RenderListener {
 	
 	/*
-	 * 
+	 * Robot Escape
 	 * 
 	 * 
 	 * BY: ESTRELSTEEL
@@ -47,7 +53,7 @@ public class LD40 implements StartListener, StopListener, TickListener, RenderLi
 	 * 
 	 * THEME: The More You Have, The Worse It Is
 	 * 
-	 * (..2017)
+	 * (03.12.2017)
 	 * 
 	 */
 	
@@ -56,7 +62,10 @@ public class LD40 implements StartListener, StopListener, TickListener, RenderLi
 	
 	private LDWorld w;
 	private Player p;
-	private ConfinedImage darkness;
+	private Image death;
+	private int level;
+	private ActorLoader actorLoader;
+	private Level loader;
 	
 	private AbstractedPoint temp_point;
 	private double temp_x;
@@ -101,16 +110,42 @@ public class LD40 implements StartListener, StopListener, TickListener, RenderLi
 	
 	@Override
 	public void start() {
-		w = new LDWorld(new PixelGrid());
-		p = new Player("PLAYER", QuickRectangle.location(320, 384, 64, 64));
-		darkness = new ConfinedImage(Engine2.devPath + "/res/img/game.png", QuickRectangle.location(0, 0, 16, 16));
-		darkness.loadImage();
+		level = 8;
+//		p = new Player("PLAYER", QuickRectangle.location(320, 384, 64, 64));
+		death = new Image(Engine2.devPath + "/res/img/death.png");
+		death.loadImage();
 		
 		TileType tt = new TileType(-1, "null");
 		tt.load(new GameFile(Engine2.devPath + "/res/tiles.txt"), 0);
 		
-		Level loader = new Level(w);
-		GameFile f = new GameFile(Engine2.devPath + "/res/lvl/lvl0.txt");
+		actorLoader = new ActorLoader();
+		
+		loadLevel();
+		
+//		w.getGunmen().add(p);
+//		w.getObjects().add(p);
+//		w.getObjects().add(new Exit(QuickRectangle.location(640, 384, 64, 64)));
+//		Guard g = (Guard) new Guard("guard", QuickRectangle.location(960, 480, 64, 64), 5, 0).setWalkspeed(3);
+//		w.getGunmen().add(g);
+//		w.getObjects().add(g);
+//		AISwitch s = new AISwitch(QuickRectangle.location(1200, 480, 64, 64), -3, 0);
+//		w.getAiSwitches().add(s);
+//		s = new AISwitch(QuickRectangle.location(720, 480, 64, 64), 3, 0);
+//		w.getAiSwitches().add(s);
+	}
+	
+	public LDWorld loadLevel(int level) {
+		this.level = level;
+		return loadLevel();
+	}
+	
+	public LDWorld loadLevel() {
+		w = new LDWorld(new PixelGrid());
+		if(p != null) {
+			p.setHP(100);
+		}
+		loader = new Level(w);
+		GameFile f = new GameFile(Engine2.devPath + "/res/lvl/lvl" + level + ".txt");
 		try {
 			f.setLines(f.readFile());
 			loader.load(f, 0);
@@ -119,15 +154,22 @@ public class LD40 implements StartListener, StopListener, TickListener, RenderLi
 			e.printStackTrace();
 		}
 		
-		w.getGunmen().add(p);
-		w.getObjects().add(p);
-//		Guard g = (Guard) new Guard("guard", QuickRectangle.location(960, 480, 64, 64), 5, 0).setWalkspeed(3);
-//		w.getGunmen().add(g);
-//		w.getObjects().add(g);
-//		AISwitch s = new AISwitch(QuickRectangle.location(1200, 480, 64, 64), -3, 0);
-//		w.getAiSwitches().add(s);
-//		s = new AISwitch(QuickRectangle.location(720, 480, 64, 64), 3, 0);
-//		w.getAiSwitches().add(s);
+		f = new GameFile(Engine2.devPath + "/res/lvl/" + level + "/entities.txt");
+		try {
+			f.setLines(f.readFile());
+			actorLoader.load(f, 0, w);
+		} 
+		catch (IOException e) {
+			e.printStackTrace();
+		}
+		
+		for(int i = 0; i < w.getGunmen().size(); i++) {
+			if(w.getGunmen().get(i) instanceof Player) {
+				p = (Player) w.getGunmen().get(i);
+				break;
+			}
+		}
+		return w;
 	}
 
 	@Override
@@ -140,12 +182,32 @@ public class LD40 implements StartListener, StopListener, TickListener, RenderLi
 		ctx.setColor(Color.BLACK);
 		ctx.fillRect(0, 0, 640, 640);
 		w.renderWorld(ctx);
+		for(int i = 0; i < w.getText().size(); i++) {
+			w.getText().get(i).render(ctx, w);
+		}
+		ctx.setColor(Color.BLACK);
+		ctx.fillRect(18, 18, 204, 44);
+		ctx.setColor(Color.RED);
+		ctx.fillRect(20, 20, 200, 40);
+		ctx.setColor(Color.GREEN);
+		ctx.fillRect(20, 20, (int) (200 * (p.getHP() / p.getMaxHP())), 40);
+		ctx.setColor(Color.BLACK);
+		ctx.setFont(new Font("Menlo", Font.BOLD, 16));
+		ctx.drawString("HP: " + (int) p.getHP() + "/" + (int) p.getMaxHP(), 40, 48);
 //		ctx.drawImage(darkness.getImage(), -10, -10, 650, 650, null);
+		if(p.getHP() <= 0) {
+			ctx.drawImage(death.getImage(), -10, -10, 650, 650, null);
+		}
 		return ctx;
 	}
 	
 	@Override
 	public void tick() {
+		if(ih.reload) {
+			ih.reload = false;
+			loadLevel();
+		}
+		
 		if(ih.up) {
 			temp_y = temp_y + -p.getWalkspeed();
 			p.setRunningAnimationNumber(0);
@@ -169,7 +231,12 @@ public class LD40 implements StartListener, StopListener, TickListener, RenderLi
 			temp_x = 0;
 			temp_y = 0;
 			p.getRunningAnimation().run();
-			if(w.checkCollide(new PerspectiveRectangleArea(p.getLocation()), p) != null) {
+			temp_renderable = w.checkCollide(new PerspectiveRectangleArea(p.getLocation()), p);
+			if(temp_renderable instanceof Exit) {
+				loadLevel(++level);
+			}
+			else if(temp_renderable != null && !(temp_renderable instanceof LaserField)) {
+				if(!(temp_renderable instanceof Door) || (temp_renderable instanceof Door && !((Door) temp_renderable).isOpen()))
 				p.setLocation(oldLoc);
 			}
 			
@@ -185,18 +252,35 @@ public class LD40 implements StartListener, StopListener, TickListener, RenderLi
 			temp_bullet = p.fireAt(temp_rotation);
 			if(temp_bullet != null) {
 				w.getObjects().add(temp_bullet);
+				p.setFired(true);
 //				w.getObjects().add(new LightSource("bullet_flash", QuickRectangle.location(temp_bullet.getLocation().getX() - 12, temp_bullet.getLocation().getY(), 32, 32), 16));
+			}
+			else {
+				p.setFired(false);
 			}
 		}
 		
-		w.sortObjects();
-		
-		
-		if(p.getHP() <= 0) {
-			System.out.println("GAME OVER YEAH!");
+		if(ih.attack2) {
+			temp_renderable = World.checkCollideIgnoreDeclaration(w.getGunmen(), new RectangleCollideArea(
+					QuickRectangle.location(temp_point.getX() - 100, temp_point.getY() - 100, 200, 200)), p);
+			if(temp_renderable != null && temp_renderable instanceof Guard) {
+				if(!((Guard) temp_renderable).isCombat()) {
+					((Guard) temp_renderable).setGuardState(GuardState.SLEEP);
+					((Guard) temp_renderable).setRunningAnimationNumber(4);
+				}
+			}
 		}
 		
-		for(int i = 0; i < w.getObjects().size(); i++) { 
+		if(ih.sneak) {
+			p.setSneaking(true);
+			p.setWalkspeed(3.0);
+		}
+		else {
+			p.setSneaking(false);
+			p.setWalkspeed(5.0);
+		}
+		
+		for(int i = 0; i < w.getObjects().size(); i++) {
 			if(w.getObjects().get(i) instanceof Actor) {
 				if(!(w.getObjects().get(i) instanceof Player)) {
 					((Actor) w.getObjects().get(i)).getRunningAnimation().run();
@@ -212,8 +296,42 @@ public class LD40 implements StartListener, StopListener, TickListener, RenderLi
 						remove = true;
 					}
 					temp_renderable = w.checkCollide(((Bullet) w.getObjects().get(i)).getHitArea(), ((Bullet) w.getObjects().get(i)));
-					if(temp_renderable != null && temp_renderable instanceof Tile) {
+					if(temp_renderable != null && (temp_renderable instanceof Tile || temp_renderable instanceof LaserField || temp_renderable instanceof Door)) {
+						if(temp_renderable instanceof Tile) {
+							if(((Tile)temp_renderable).getType() != TileType.types.get(8) && ((Tile)temp_renderable).getType() != TileType.types.get(9)) {
+								remove = true;
+							}
+						}
+						else if(temp_renderable instanceof Door && ((Door) temp_renderable).getRunningAnimationNumber() == 0) {
+							remove = true;
+						}
+						else {
+							remove = true;
+						}
+					}
+					if(temp_renderable != null && temp_renderable instanceof Button) {
 						remove = true;
+						((Button) temp_renderable).setPressed(!((Button) temp_renderable).isPressed());
+						if(((Button) temp_renderable).isPressed()) {
+							((Button) temp_renderable).setRunningAnimationNumber(1);
+						}
+						else {
+							((Button) temp_renderable).setRunningAnimationNumber(0);
+						}
+						for(int j = 0; j < w.getObjects().size(); j++) {
+							if(w.getObjects().get(j) instanceof Door) {
+								if(((Door) w.getObjects().get(j)).getName().equals(((Button) temp_renderable).getName())) {
+									((Door) w.getObjects().get(j)).setOpen(!((Door) w.getObjects().get(j)).isOpen());
+									if(((Door) w.getObjects().get(j)).isOpen()) {
+										((Door) w.getObjects().get(j)).setRunningAnimationNumber(1);
+									}
+									else {
+										((Door) w.getObjects().get(j)).setRunningAnimationNumber(2);
+									}
+								}
+							}
+						}
+						
 					}
 					
 					if(remove) {
@@ -234,6 +352,7 @@ public class LD40 implements StartListener, StopListener, TickListener, RenderLi
 							((Guard) w.getObjects().get(i)).setGuardState(GuardState.GHOST);
 							((Guard) w.getObjects().get(i)).setHP(10000);
 							((Guard) w.getObjects().get(i)).setRunningAnimationNumber(5);
+							p.setGhosts(p.getGhosts() + 1);
 						}
 						((Guard) w.getObjects().get(i)).determineAction(p, w);
 						temp_renderable = World.checkCollideIgnoreDeclaration(w.getAiSwitches(), new RectangleCollideArea(w.getObjects().get(i).getLocation()), null);
@@ -249,7 +368,21 @@ public class LD40 implements StartListener, StopListener, TickListener, RenderLi
 						((Gunman) w.getObjects().get(i)).setReloadCooldown(((Gunman) w.getObjects().get(i)).getReloadCooldown() - 1);
 					}
 				}
+				else if(w.getObjects().get(i) instanceof Door) {
+					if(((Door) w.getObjects().get(i)).getRunningAnimationNumber() == 1) {
+						if(((Door) w.getObjects().get(i)).getRunningAnimation().getCurrentFrame() > 4) {
+							((Door) w.getObjects().get(i)).setRunningAnimationNumber(3);
+						}
+					}
+					if(((Door) w.getObjects().get(i)).getRunningAnimationNumber() == 2) {
+						if(((Door) w.getObjects().get(i)).getRunningAnimation().getCurrentFrame() > 4) {
+							((Door) w.getObjects().get(i)).setRunningAnimationNumber(0);
+						}
+					}
+				}
 			}
 		}
+		
+		w.sortObjects();
 	}
 }

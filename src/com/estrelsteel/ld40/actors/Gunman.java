@@ -1,13 +1,14 @@
 package com.estrelsteel.ld40.actors;
 
 import com.estrelsteel.engine2.actor.Actor;
+import com.estrelsteel.engine2.file.Saveable;
 import com.estrelsteel.engine2.point.AbstractedPoint;
 import com.estrelsteel.engine2.point.PointMaths;
 import com.estrelsteel.engine2.shape.Rotation;
 import com.estrelsteel.engine2.shape.rectangle.QuickRectangle;
 import com.estrelsteel.engine2.shape.rectangle.Rectangle;
 
-public abstract class Gunman extends Actor {
+public abstract class Gunman extends Actor implements Saveable {
 	
 	private double hp;
 	private double maxhp;
@@ -24,8 +25,8 @@ public abstract class Gunman extends Actor {
 	public Gunman(String name, Rectangle loc) {
 		super(name, loc);
 		
-		this.bullets = 8;
-		this.clips = 10;
+		this.bullets = 4;
+		this.clips = 100000;
 		this.fireRate = 45;
 		this.fireCooldown = 0;
 		this.reloadRate = 120;
@@ -34,6 +35,8 @@ public abstract class Gunman extends Actor {
 		this.hp = 100;
 		this.maxhp = 100;
 		this.walkspeed = 5;
+		
+		setSortable(true);
 	}
 
 	public int getBullets() {
@@ -130,7 +133,7 @@ public abstract class Gunman extends Actor {
 			else {
 				if(getClips() > 0) {
 					setReloadCooldown(getReloadRate());
-					setBullets(8);
+					setBullets(4);
 					setClips(getClips() - 1);
 					System.out.println("reloading");
 				}

@@ -1,0 +1,8 @@
+ACT
+PLY 320 384 64 64
+TXT 512 512 64 Thanks for Playing!!!
+TXT 512 608 32 By: Estrel Steel
+TXT 512 656 32 Ludum Dare 40 Compo (03.12.2017)
+TXT 576 704 32 Theme: The more you have, the worse it gets.
+
+

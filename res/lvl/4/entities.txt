@@ -1,0 +1,11 @@
+ACT
+EXT 1408 384 64 64
+PLY 320 384 64 64
+LRF 448 320 64 192 0
+LRF 1280 320 64 192 0
+GAR 790 384 64 64 0 0 2
+TXT 270 600 16 Watch enemy fire!
+TXT 820 600 16 Ghost of the fallen guards
+TXT 790 620 16 will haunt you and block lasers.
+TXT 1200 600 16 Ghosts can’t move through 
+TXT 1230 620 16 laser fields though

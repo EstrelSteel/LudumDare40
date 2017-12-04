@@ -1,0 +1,8 @@
+ACT
+EXT 576 896 64 64
+PLY 320 384 64 64
+DOR a 512 544 192 96
+BUT a 1472 384 64 64 0
+TXT 170 580 16 The door is locked. Maybe there’s  
+TXT 190 600 16 a button which will open it.
+TXT 1152 600 16 Fire a laser at the button to active it.

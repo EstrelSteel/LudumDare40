@@ -15,6 +15,8 @@ public class InputHandler implements KeyListener, MouseListener, MouseMotionList
 	public boolean right;
 	public boolean attack1;
 	public boolean attack2;
+	public boolean sneak;
+	public boolean reload;
 	
 	public int x;
 	public int y;
@@ -26,6 +28,7 @@ public class InputHandler implements KeyListener, MouseListener, MouseMotionList
 		right = false;
 		attack1 = false;
 		attack2 = false;
+		reload = false;
 		
 		x = 0;
 		y = 0;
@@ -51,12 +54,13 @@ public class InputHandler implements KeyListener, MouseListener, MouseMotionList
 		if(e.getKeyCode() == 68 || e.getKeyCode() == 39) {
 			right = true;
 		}
-//		if(e.getKeyCode() == 32 || e.getKeyCode() == 16) {
-//			attack1 = true;
-//		}
-//		if(e.getKeyCode() == 69 || e.getKeyCode() == 88) {
-//			attack2 = true;
-//		}
+		if(e.getKeyCode() == 16 || e.getKeyCode() == 17 || e.getKeyCode() == 96) {
+			sneak = true;
+		}
+		if(e.getKeyCode() == 27) {
+			reload = true;
+			System.out.println("restarting");
+		}
 	}
 
 	@Override
@@ -73,12 +77,9 @@ public class InputHandler implements KeyListener, MouseListener, MouseMotionList
 		if(e.getKeyCode() == 68 || e.getKeyCode() == 39) {
 			right = false;
 		}
-//		if(e.getKeyCode() == 32 || e.getKeyCode() == 90) {
-//			attack1 = false;
-//		}
-//		if(e.getKeyCode() == 69 || e.getKeyCode() == 88) {
-//			attack2 = false;
-//		}
+		if(e.getKeyCode() == 16 || e.getKeyCode() == 17 || e.getKeyCode() == 96) {
+			sneak = false;
+		}
 	}
 
 

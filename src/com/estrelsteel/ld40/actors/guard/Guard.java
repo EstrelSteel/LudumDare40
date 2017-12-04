@@ -1,8 +1,10 @@
 package com.estrelsteel.ld40.actors.guard;
 
 import com.estrelsteel.engine2.Engine2;
+import com.estrelsteel.engine2.file.GameFile;
 import com.estrelsteel.engine2.image.Animation;
 import com.estrelsteel.engine2.image.ConfinedImage;
+import com.estrelsteel.engine2.image.Renderable;
 import com.estrelsteel.engine2.point.AbstractedPoint;
 import com.estrelsteel.engine2.point.PointMaths;
 import com.estrelsteel.engine2.shape.Rotation;
@@ -10,6 +12,7 @@ import com.estrelsteel.engine2.shape.collide.PerspectiveRectangleArea;
 import com.estrelsteel.engine2.shape.collide.RectangleCollideArea;
 import com.estrelsteel.engine2.shape.rectangle.QuickRectangle;
 import com.estrelsteel.engine2.shape.rectangle.Rectangle;
+import com.estrelsteel.engine2.world.World;
 import com.estrelsteel.ld40.LDWorld;
 import com.estrelsteel.ld40.actors.Bullet;
 import com.estrelsteel.ld40.actors.Gunman;
@@ -32,6 +35,8 @@ public class Guard extends Gunman {
 	
 	public Guard(String name, Rectangle loc, double movex, double movey) {
 		super(name, loc);
+		
+		this.setSortable(true);
 		
 		getAnimations().add(0, new Animation("guard_up", 0));
 		getAnimations().get(0).getFrames().add(new ConfinedImage(Engine2.devPath + "/res/img/guard0.png", QuickRectangle.location(0 * 16, 2 * 16, 16, 16)));
@@ -165,13 +170,40 @@ public class Guard extends Gunman {
 	public void damage(double damage) {
 		super.damage(damage);
 		combat = true;
-		System.out.println("entering combat");
+	}
+	
+	public RectangleCollideArea getSightArea(Player p) {
+		if(getRunningAnimationNumber() == 0) {
+			return new RectangleCollideArea(QuickRectangle.location(getLocation().getX() - 8 * p.getGhosts(), getLocation().getY() - getSightRange(),
+					getLocation().getWidth() + 16 * p.getGhosts(), getSightRange()));
+		}
+		else if(getRunningAnimationNumber() == 1) {
+			return new RectangleCollideArea(QuickRectangle.location(getLocation().getX() - 8 * p.getGhosts(), getLocation().getY() + getLocation().getHeight(), 
+					getLocation().getWidth() + 16 * p.getGhosts(), getSightRange()));
+		}
+		else if(getRunningAnimationNumber() == 2) {
+			return new RectangleCollideArea(QuickRectangle.location(getLocation().getX() - getSightRange(), getLocation().getY() - 8 * p.getGhosts(), 
+					getSightRange(), getLocation().getHeight() + 16 * p.getGhosts()));
+		}
+		else if(getRunningAnimationNumber() == 3) {
+			return new RectangleCollideArea(QuickRectangle.location(getLocation().getX() + getLocation().getWidth(), getLocation().getY() - 8 * p.getGhosts(), 
+					getSightRange(), getLocation().getHeight() + 16 * p.getGhosts()));
+		}
+		return null;
 	}
 
 	public Guard determineAction(Player p, LDWorld w) {
 		if(state == GuardState.ACTIVE) {
-			if(PointMaths.getDistanceTo(PointMaths.getCentre(getLocation()), PointMaths.getCentre(p.getLocation())) < sightRange) {
-				combat = true;
+			if(p.isSneaking() && !p.hasFired()) {
+				Renderable renderable = World.checkCollideIgnoreDeclaration(w.getGunmen(), getSightArea(p), this);
+				if(renderable != null && renderable instanceof Player) {
+					combat = true;
+				}
+			}
+			else {
+				if(PointMaths.getDistanceTo(PointMaths.getCentre(getLocation()), PointMaths.getCentre(p.getLocation())) < getSightRange()) {
+					combat = true;
+				}
 			}
 			if(!combat && !lost) {
 				return walk(true, w);
@@ -247,7 +279,7 @@ public class Guard extends Gunman {
 			}
 		}
 		else if(state == GuardState.GHOST) {
-			if(!new RectangleCollideArea(p.getLocation()).checkCollision(getLocation())) {
+			if(!new RectangleCollideArea(QuickRectangle.location(p.getLocation().getX() - 32, p.getLocation().getY() - 32, 128, 128)).checkCollision(getLocation())) {
 				Rotation r = PointMaths.getDirectionTowards(PointMaths.getCentre(getLocation()), PointMaths.getCentre(p.getLocation()));
 				movex = getWalkspeed() * Math.cos(r.getRadians());
 				movey = getWalkspeed() * Math.sin(r.getRadians());
@@ -303,6 +335,28 @@ public class Guard extends Gunman {
 			}
 		}
 		return this;
+	}
+
+	@Override
+	public String getIdentifier() {
+		return "GAR";
+	}
+
+	@Override
+	public Object load(GameFile file, int line) {
+		String args[] = file.getLines().get(line).split(" ");
+		if(args[0].equalsIgnoreCase(getIdentifier())) {
+			Guard g = new Guard("Guard", QuickRectangle.location(Double.parseDouble(args[1]), Double.parseDouble(args[2]), Double.parseDouble(args[3]), Double.parseDouble(args[4])), 
+					Double.parseDouble(args[5]), Double.parseDouble(args[6]));
+			g.setRunningAnimationNumber(Integer.parseInt(args[7]));
+			return g;
+		}
+		return null;
+	}
+
+	@Override
+	public GameFile save(GameFile file) {
+		return file;
 	}
 
 }

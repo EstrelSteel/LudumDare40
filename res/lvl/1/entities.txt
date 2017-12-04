@@ -1,0 +1,6 @@
+ACT
+EXT 1408 384 64 64
+PLY 320 384 64 64
+GAR 960 384 64 64 0 0 3
+TXT 150 640 16 Press Shift to sneak up on the guard.
+TXT 780 640 16 Get close and right click to knock them out.

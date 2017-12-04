@@ -1,0 +1,5 @@
+LVL
+/res/lvl/0/a.txt
+/res/lvl/0/b.txt
+/res/lvl/0/c.txt
+/res/lvl/0/d.txt

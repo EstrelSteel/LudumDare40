@@ -1,0 +1,7 @@
+LVL
+/res/lvl/3/a.txt
+/res/lvl/3/b.txt
+/res/lvl/3/c.txt
+/res/lvl/3/d.txt
+/res/lvl/3/e.txt
+/res/lvl/3/f.txt

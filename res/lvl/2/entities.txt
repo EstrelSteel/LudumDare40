@@ -1,0 +1,6 @@
+ACT
+EXT 1408 384 64 64
+PLY 320 384 64 64
+LRF 640 320 64 192 0
+TXT 520 640 16 This is a Laser Field, it stops
+TXT 520 660 16 lasers from passing through it.
