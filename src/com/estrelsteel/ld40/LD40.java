@@ -101,8 +101,8 @@ public class LD40 implements StartListener, StopListener, TickListener, RenderLi
 		l.getEngine().ROUNDING_FORMAT = new DecimalFormat("0.##");
 		
 		l.getEngine().development = true;
-		l.getEngine().devPath = System.getProperty("user.home") + "/Documents/usb/LD40/LD40";
-//		l.getEngine().devPath = GameFile.getCurrentPath();
+//		l.getEngine().devPath = System.getProperty("user.home") + "/Documents/usb/LD40/LD40";
+		l.getEngine().devPath = GameFile.getCurrentPath();
 		
 		l.boot();
 	}
@@ -110,7 +110,7 @@ public class LD40 implements StartListener, StopListener, TickListener, RenderLi
 	
 	@Override
 	public void start() {
-		level = 8;
+		level = 0;
 //		p = new Player("PLAYER", QuickRectangle.location(320, 384, 64, 64));
 		death = new Image(Engine2.devPath + "/res/img/death.png");
 		death.loadImage();
